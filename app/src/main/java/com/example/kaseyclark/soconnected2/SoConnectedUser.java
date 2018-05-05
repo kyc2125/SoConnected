@@ -1,8 +1,14 @@
+package com.example.kaseyclark.soconnected2;
+
+import com.example.kaseyclark.soconnected2.Question;
+
+import java.io.Serializable;
+
 /**
  * Created by kaseyclark on 5/2/18.
  */
 
-public class SoConnectedUser {
+public class SoConnectedUser implements Serializable {
     private Question questions[];
 
     public SoConnectedUser() {

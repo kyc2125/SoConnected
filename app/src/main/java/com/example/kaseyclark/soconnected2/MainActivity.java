@@ -21,94 +21,68 @@ import android.support.annotation.NonNull;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+    SoConnectedUser user;
+   private  TextView tv_question1;
+   private  TextView tv_question2;
+  private   TextView tv_question3;
+    private TextView tv_question4;
+   private  TextView tv_question5;
 
-    TextView userInput;
-    TextView displayText;
-    private ArrayList<String >textList=new ArrayList<>();
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private FirebaseAuth auth =FirebaseAuth.getInstance();
-    private FirebaseAuth.AuthStateListener authListener;
-    private DatabaseReference userRef;
-
-
-
+   private  EditText et_answer1;
+   private  EditText et_answer2;
+    private EditText et_answer3;
+   private  EditText et_answer4;
+   private  EditText et_answer5;
+   private TextView tv_questions[]=new TextView[5];
+   private EditText et_answers[]=new EditText[5];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        tv_question1=(TextView) findViewById(R.id.textView_q1);
+        et_answer1=(EditText) findViewById(R.id.edittext_a1);
+        tv_question2=(TextView) findViewById(R.id.textView_q2);
+        et_answer2=(EditText) findViewById(R.id.edittext_a2);
+        tv_question3=(TextView) findViewById(R.id.textView_q3);
+        et_answer3=(EditText) findViewById(R.id.edittext_a3);
+        tv_question4=(TextView) findViewById(R.id.textView_q4);
+        et_answer4=(EditText) findViewById(R.id.edittext_a4);
+        tv_question5=(TextView) findViewById(R.id.textView_q5);
+        et_answer5=(EditText) findViewById(R.id.edittext_a5);
+         tv_questions [0] = tv_question1;
+        tv_questions [1] = tv_question2;
+        tv_questions [2] = tv_question3;
+        tv_questions [3] = tv_question4;
+        tv_questions [4] = tv_question5;
+
+         et_answers[0]= et_answer1;
+        et_answers[1]= et_answer2;
+        et_answers[2]= et_answer3;
+        et_answers[3]= et_answer4;
+        et_answers[4]= et_answer5;
 
 
-        displayText=(TextView) findViewById(R.id.textView_data);
-        userInput =(EditText) findViewById(R.id.edittext_data);
-
-        authListener=new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-
-                if (user == null) {
-                    startActivity(new Intent(MainActivity.this, Logon.class));
-                } else {
-                     userRef=database.getReference(user.getUid());
-                     userRef.addChildEventListener(new ChildEventListener() {
-
-
-                         @Override
-                         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                            textList.add(dataSnapshot.getValue(String.class));
-                            displayText();
-                         }
-
-                         @Override
-                         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                             Toast.makeText(MainActivity.this, dataSnapshot.getValue(String.class)+ "has changed", Toast.LENGTH_SHORT).show();
-
-                         }
-
-                         @Override
-                         public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                         }
-
-                         @Override
-                         public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                         }
-
-                         @Override
-                         public void onCancelled(DatabaseError databaseError) {
-
-                         }
-                     });
-                }
-            }
-        };
+        user = new SoConnectedUser ();
+        Question questions[]=user.getQuestions();
+        for (int i =0; i <questions.length; ++i){
+            Question question= questions[i];
+            this.tv_questions[i].setText(question.getQuestion());
+        }
     }
 
-        public void logoutbutton (View view){
-         auth.signOut();
-         textList.clear();
-         displayText.setText("");
-         userInput.setText("");
-        startActivity(new Intent(MainActivity.this, Logon.class));
+    public void submitbutton (View view) {
 
 
+    String answers []= new String[user.getQuestions().length];
+        for (int i =0; i<this.et_answers.length; ++i){
+            EditText et = this.et_answers[i];
+            answers [i]=et.getText().toString();
+        }
+user.setAnswersToQuestions(answers);
+        Intent intent=new Intent (MainActivity.this,ShowAnswers.class);
+        intent.putExtra("user", user);
+        startActivity(intent);
     }
-private void displayText(){
-            String text="";
-            for (String s : textList){
-                text += s + "/n";
-            }
-            displayText.setText(text);
-}
-public void sendbutton (View view) {
-    FirebaseUser user =auth.getCurrentUser();
-    userRef=database.getReference(user.getUid());
-    String userText = userInput.getText().toString();
-
-    userRef.push().setValue(userText);
-
-}
 }
